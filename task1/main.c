@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_USERS 610
+#define MAX_USERS 2
 #define MAX_BOOKS 193609
 
 const int N = 10;
-char iFiLeName[8] = "out.txt";
+char iFiLeName[8] = "test.txt";
 
 struct Node {
   float rating;
+  int index;
   struct Node* next;
 };
 
@@ -35,6 +36,7 @@ struct Node* initNewNode(float _rating) {
 
   node->rating = _rating;
   node->next = NULL;
+  node->index = -1;
   return node;
 }
 
@@ -72,6 +74,40 @@ void addItemToMatrix(struct SparseMatrixLinkedList *root, int index, float ratin
   insertNewNode(&root->indexForRoots[index], rating);
 }
 
+float dotProductBetween(struct LinkedList *from, struct LinkedList *to) {
+  float dot = 0.0f;
+  struct Node *prtFrom = from->root;
+  struct Node *ptrTo = to->root;
+
+  while (prtFrom != NULL && ptrTo != NULL) {
+    if (prtFrom->index == ptrTo->index) {
+      dot += prtFrom->rating * ptrTo->rating;
+      prtFrom = prtFrom->next;
+      ptrTo = ptrTo->next; 
+    } else if (prtFrom->index < ptrTo->index) {
+      prtFrom = prtFrom->next;
+    } else {
+      ptrTo = ptrTo->next;
+    }
+  } 
+}
+
+void freeLL(struct LinkedList *head) {
+  struct Node* current = head->root;
+  struct Node* next;
+  while (current != NULL) {
+    next = current->next;
+    free(current);
+    current = next;
+  }
+  free(head);
+}
+
+void freeMemory(struct SparseMatrixLinkedList *root) {
+  for (int i = 0; i <= MAX_USERS; ++i) {
+    freeLL(root->indexForRoots[i]);
+  }
+}
 
 void pritInfOfNodes(struct LinkedList **head) {
   struct Node *tmp = (*head)->root;
@@ -109,6 +145,8 @@ int main() {
   fclose(iFile);
 
   printInfMatrix(&matrix);
+
+  freeMemory(&matrix);
 
   return 0;
 }
