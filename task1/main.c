@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_USERS 3
-#define MAX_BOOKS 20
+#define MAX_USERS 610
+#define MAX_BOOKS 193609
 
 const int N = 10;
-char iFiLeName[8] = "test.txt";
+char iFiLeName[8] = "out.txt";
 
 struct Node {
   float rating;
@@ -109,6 +109,6 @@ int main() {
   fclose(iFile);
 
   printInfMatrix(&matrix);
-  
+
   return 0;
 }
