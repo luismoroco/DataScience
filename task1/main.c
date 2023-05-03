@@ -90,6 +90,8 @@ float dotProductBetween(struct LinkedList *from, struct LinkedList *to) {
       ptrTo = ptrTo->next;
     }
   } 
+
+  return dot;
 }
 
 void freeLL(struct LinkedList *head) {
@@ -138,7 +140,9 @@ int main() {
   int head, node;
   float rating;
   while (fscanf(iFile, "%d\t%d\t%f", &head, &node, &rating) != EOF) {
-    addItemToMatrix(&matrix, head, rating);
+    if (rating != 0) {
+      addItemToMatrix(&matrix, head, rating);
+    }
   }
 
 
