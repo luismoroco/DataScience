@@ -4,9 +4,3 @@ APP=Task1
 run:
 	gcc main.c exe
 	./exe
-
-.PHONY: push
-push:
-	git add .
-	git commit -m "Makefile generated"
-	git push origin main

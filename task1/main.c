@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_USERS 10
+#define MAX_USERS 3
 #define MAX_BOOKS 20
 
 const int N = 10;
@@ -38,32 +38,53 @@ struct Node* initNewNode(float _rating) {
   return node;
 }
 
-void insertNewNode(struct LinkedList *head, float rating) {
+void insertNewNode(struct LinkedList **head, float rating) {
   struct Node *node = initNewNode(rating);
 
-  if (head->root == NULL) {
-    head->root = node;
-    head->tail = node;
-    head->size += 1;
+  if (*head == NULL) {
+    *head = (struct LinkedList *) malloc(sizeof(struct LinkedList));
+    initLinkedList(*head);
+  }
+
+  if ((*head)->root == NULL) {
+    (*head)->root = node;
+    (*head)->tail = node;
+    (*head)->size += 1;
   } else {
-    head->tail->next = node;
-    head->tail = node;
-    head->size += 1;
+    (*head)->tail->next = node;
+    (*head)->tail = node;
+    (*head)->size += 1;
   }
 }
 
-struct SparseMatrixLinkedListBased {
-  double *reultsByIndex;
-  struct Node* headForUsers[MAX_BOOKS + 1];
+struct SparseMatrixLinkedList {
+  struct LinkedList *indexForRoots[MAX_USERS + 1];
 };
 
-void initMatrix(struct SparseMatrixLinkedListBased *matrix) {
-  matrix->reultsByIndex = (double *) malloc(MAX_USERS + 1 * sizeof(double));
+void initMatrixLL(struct SparseMatrixLinkedList *root) {
+  for (int i = 1; i <= MAX_USERS; ++i) {
+    root->indexForRoots[i] = (struct LinkedList *) malloc(sizeof(struct LinkedList));
+    initLinkedList(root->indexForRoots[i]);
+  }
+}
 
-  for (int i = 1; i <= MAX_BOOKS; ++i) {
-    matrix->headForUsers[i] = (struct Node *) malloc(sizeof(struct Node));
-    matrix->headForUsers[i]->rating = 0.0;
-    matrix->headForUsers[i]->next = NULL;
+void addItemToMatrix(struct SparseMatrixLinkedList *root, int index, float rating) {
+  insertNewNode(&root->indexForRoots[index], rating);
+}
+
+
+void pritInfOfNodes(struct LinkedList **head) {
+  struct Node *tmp = (*head)->root;
+  while (tmp != NULL) {
+    printf(" -> %f", tmp->rating);
+    tmp = tmp->next;
+  }
+  printf("\n");
+}
+
+void printInfMatrix(struct SparseMatrixLinkedList *root) {
+  for (int i = 1; i <= MAX_USERS; ++i) {
+    pritInfOfNodes(&root->indexForRoots[i]);
   }
 }
 
@@ -75,22 +96,19 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
+  struct SparseMatrixLinkedList matrix;
+  initMatrixLL(&matrix);
+
   int head, node;
   float rating;
   while (fscanf(iFile, "%d\t%d\t%f", &head, &node, &rating) != EOF) {
-    printf("%d\t%d\t%f\n", head, node, rating);
+    addItemToMatrix(&matrix, head, rating);
   }
-  
-
-
-
 
 
   fclose(iFile);
 
-  struct SparseMatrixLinkedListBased matrix;
-  initMatrix(&matrix);
-
-
+  printInfMatrix(&matrix);
+  
   return 0;
 }
