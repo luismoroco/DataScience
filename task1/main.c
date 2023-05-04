@@ -13,8 +13,6 @@ const int N = 10;
 char iFiLeName[8] = "out.txt";
 char iMovName[12] = "outmov.txt";
 
-char *titles[MAX_BOOKS + 1];
-
 char *sparTitle[BOOKS_INPUT + 1];
 int sparIndex[BOOKS_INPUT + 1];
 
@@ -146,8 +144,22 @@ struct Tuple computeBestCosineSimilarity(struct SparseMatrixLinkedList *root, in
   return best;
 }
 
-int binarySearch(int *arr, int len, int target) {
-  return 1;
+int binarySearch(int target) {
+  int left = 0;
+  int right = BOOKS_INPUT;
+  int middle;
+
+  while (left <= right) {
+    middle = (left + right)/2;
+    if (sparIndex[middle] == target) {
+      return middle;  
+    } else if (sparIndex[middle] < target) {
+      left = middle + 1;
+    } else {
+      right = middle - 1;
+    }
+  }
+  return -1;
 }
 
 /* HELP fx */
@@ -184,24 +196,19 @@ int main() {
   }
  
   int id;
-  int i = 0;
+  int i = 1;
   char line[LINE];
   char buffer[BUFFER];
-  while (fgets(line, sizeof(line), iMov) != NULL && i < BOOKS_INPUT) {
+  while (fgets(line, sizeof(line), iMov) != NULL && i <= BOOKS_INPUT) {
     if (sscanf(line, "%d\t %[^\n]", &id, buffer) == 2) {
-      titles[id] = malloc(strlen(buffer) + 1);
-      strcpy(titles[id], buffer);
+      sparTitle[i] = malloc(strlen(buffer) + 1);
+      sparIndex[i] = id;
+      strcpy(sparTitle[i], buffer);
       ++i;
     }
   }
   
   fclose(iMov);
-
-  for (int i = 1; i <= MAX_BOOKS; ++i) {
-    printf("Index %d : %s\n", i, titles[i]);
-  }
-
-  /*
 
   FILE *iFile;
   iFile = fopen(iFiLeName, "r");
@@ -222,13 +229,30 @@ int main() {
   }
 
   fclose(iFile);
-  //printInfMatrix(&matrix);
 
-  struct Tuple res = computeBestCosineSimilarity(&matrix, 1);
-  printf("cos: %f - id user: %d", res.similarity, res.id);
+  int option; 
+  int idUser;
+  do {
+    printf("Select an option: \n1) Cosine Similarity\n4) Exit\n");
+    scanf("%d", &option);
 
-  //freeMemory(&matrix);
+    switch (option) {
+      case 1:
+        printf("Put the User Id: ");
+        scanf("%d", &idUser);
+        struct Tuple res = computeBestCosineSimilarity(&matrix, idUser);
+        printf("cos: %f - id user: %d\n", res.similarity, res.id);
+        break;
+      
+      case 4:
+        printf("Bye!\n");
+        return 0;
+      
+      default:
+        printf("That option doesn't exist!\n");
+        break;
+    }
+  } while (option != 4);
 
-  */
   return 0;
 }
