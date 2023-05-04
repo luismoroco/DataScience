@@ -3,16 +3,16 @@
 #include <string.h>
 #include <math.h>
 
-#define MAX_USERS 2
+#define MAX_USERS 610
 #define LINE 1024
-#define BOOKS_INPUT 5
+#define BOOKS_INPUT 9742
 #define BUFFER 200
 
-// #define MAX_USERS 610
-// #define BOOKS_INPUT 9742
+// #define MAX_USERS 610 2
+// #define BOOKS_INPUT 9742 5
 
-char iFiLeName[10] = "test.txt";
-char iMovName[12] = "testmov.txt";
+char iFiLeName[10] = "out.txt";
+char iMovName[12] = "outmov.txt";
 
 char *sparTitle[BOOKS_INPUT + 1];
 int sparIndex[BOOKS_INPUT + 1];
@@ -128,9 +128,27 @@ float manhattanBetween(struct LinkedList *from, struct LinkedList *to) {
     }
   } 
 
-  free(ptrTo);
-
   return manh;
+}
+
+float eucledianBetween(struct LinkedList *from, struct LinkedList *to) {
+  float dist = 0.0f;
+  struct Node *prtFrom = from->root;
+  struct Node *ptrTo = to->root;
+
+  while (prtFrom != NULL && ptrTo != NULL) {
+    if (prtFrom->index == ptrTo->index) {
+      dist += pow(prtFrom->rating - ptrTo->rating, 2);
+      prtFrom = prtFrom->next;
+      ptrTo = ptrTo->next; 
+    } else if (prtFrom->index < ptrTo->index) {
+      prtFrom = prtFrom->next;
+    } else {
+      ptrTo = ptrTo->next;
+    }
+  } 
+
+  return dist;
 }
 
 float queryDotProductBetween(struct SparseMatrixLinkedList *root, int src, int to) {
@@ -139,6 +157,10 @@ float queryDotProductBetween(struct SparseMatrixLinkedList *root, int src, int t
 
 float queryManhattanBetween(struct SparseMatrixLinkedList *root, int src, int to) {
   return manhattanBetween(root->indexForRoots[src], root->indexForRoots[to]);
+}
+
+float queryEucledianBetween(struct SparseMatrixLinkedList *root, int src, int to) {
+  return eucledianBetween(root->indexForRoots[src], root->indexForRoots[to]);
 }
 
 void freeLL(struct LinkedList *head) {
@@ -178,6 +200,19 @@ struct Tuple computeBestManhattan(struct SparseMatrixLinkedList *root, int src) 
   for (int i = 1; i <= MAX_USERS; ++i) {
     if (src == i) continue;
     distance = queryManhattanBetween(root, src, i);
+    best = (distance < best.similarity) ? (struct Tuple){distance, i} : best;
+  }
+
+  return best;
+}
+
+struct Tuple computeBestEucledian(struct SparseMatrixLinkedList *root, int src) {
+  struct Tuple best = {99999.0f, -1};
+  float distance = -1.0f;
+
+  for (int i = 1; i <= MAX_USERS; ++i) {
+    if (src == i) continue;
+    distance = sqrt(queryEucledianBetween(root, src, i));
     best = (distance < best.similarity) ? (struct Tuple){distance, i} : best;
   }
 
@@ -274,7 +309,7 @@ int main() {
   int idUser;
   struct Tuple res;
   do {
-    printf("Select an option: \n1) Cosine Similarity\n2) Manhattan Distance\n4) Exit\n");
+    printf("Select an option: \n1) Cosine Similarity\n2) Manhattan Distance\n3) Eucledian Distance\n4) Exit\n");
     scanf("%d", &option);
 
     switch (option) {
@@ -289,6 +324,13 @@ int main() {
         printf("Put the User Id: ");
         scanf("%d", &idUser);
         res = computeBestManhattan(&matrix, idUser);
+        printf("cos: %f - id user: %d\n", res.similarity, res.id);
+        break;
+      
+      case 3:
+        printf("Put the User Id: ");
+        scanf("%d", &idUser);
+        res = computeBestEucledian(&matrix, idUser);
         printf("cos: %f - id user: %d\n", res.similarity, res.id);
         break;
       
