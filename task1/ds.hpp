@@ -6,10 +6,14 @@
 #include <functional>
 #include <cmath>
 #include <utility>
+#include <limits>
 
+using std::numeric_limits;
 using std::vector;
 using std::function;
 using std::pair;
+
+const float INF = numeric_limits<float>::max();
 
 template <typename T>
 struct Node {
@@ -121,7 +125,7 @@ struct Main {
     Main(MatrixLLBased<T> x, int u): qe(x), LenUsers(++u) {}
     
     pair<T, int> fitManhattan(int src) {
-      pair<T, int> fit = {99999.0f, -1};
+      pair<T, int> fit = {INF, -1};
       T v;
       for (int i = 1; i <= LenUsers; ++i) {
         if (src == i) continue;
@@ -133,7 +137,7 @@ struct Main {
     }
 
     pair<T, int> fitEucledian(int src) {
-      pair<T, int> fit = {99999.0f, -1};
+      pair<T, int> fit = {INF, -1};
       T v;
       for (int i = 1; i <= LenUsers; ++i) {
         if (src == i) continue;
