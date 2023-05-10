@@ -7,23 +7,28 @@
 #include <cmath>
 #include <utility>
 #include <limits>
+#include <map>
+#include <queue>
 
+using std::priority_queue;
 using std::numeric_limits;
 using std::vector;
 using std::function;
 using std::pair;
+using std::map;
 
 const float INF = numeric_limits<float>::max();
 
 template <typename T>
 struct Node {
-  T value;
+  T v;
   int index;
   Node<T> *next;
 
-  Node(T v, int x):
-    value(v), index(x),
-    next(nullptr) {}
+  Node(T v, int x)
+    :v(v), index(x), next(nullptr) {}
+  
+  bool operator<(const Node<T>& b) const { return v > b.v; }
 };
 
 template <typename T>
@@ -32,21 +37,21 @@ struct LinkedList {
   T module, sum;
   int size;
 
-  LinkedList():
-    root(nullptr), tail(nullptr),
-    module(0.0), sum(0.0), size(0) {}
+  LinkedList()
+    : root(nullptr), tail(nullptr), 
+      module(0.0), sum(0.0), size(0) {}
 
   void add(Node<T> *node) {
     if (this->root == nullptr) {
       this->root = node;
       this->tail = node;
       this->size += 1;
-      this->module += node->value * node->value;
+      this->module += node->v * node->v;
     } else {
       this->tail->next = node;
       this->tail = node;
       this->size += 1;
-      this->module += node->value * node->value;
+      this->module += node->v * node->v;
     }
   }
 };
@@ -72,7 +77,7 @@ struct MatrixLLBased {
 
     while (F != nullptr && S != nullptr) {
       if (F->index == S->index) {
-        v += f(F->value, S->value);
+        v += f(F->v, S->v);
         F = F->next;
         S = S->next; 
       } else if (F->index < S->index) {
@@ -92,6 +97,7 @@ template <typename T>
 struct QueryEngine {
   private:
     MatrixLLBased<T> main;
+    map<pair<int, int>, T> dp;
     
     function<T(T, T)> dot = [](T x, T y) -> T { return x * y; };
     function<T(T, T)> manh = [](T x, T y) -> T { return fabs(x - y); };
@@ -99,6 +105,17 @@ struct QueryEngine {
 
   public:
     QueryEngine(MatrixLLBased<T> v): main(v) {}
+
+    pair<bool, T> search(int src, int to) {
+      pair<int, int> x = {src, to}, y = {to, src};
+      auto a = dp.find(x);
+      if (a != dp.end()) 
+        return {true, a->second};
+      auto b = dp.find(y);
+      if (b != dp.end()) 
+        return {true, b->second};
+      return {false, -1.0f};
+    }
 
     T manhattan(int src, int to) {
       return main.iterateTwoLL(src, to, manh);
@@ -109,20 +126,43 @@ struct QueryEngine {
     } 
 
     T dotProduct(int src, int to) {
-      return main.iterateTwoLL(src, to, dot);
+      pair<bool, T> query = search(src, to);
+      if (query.first != false) 
+        return query.second;
+      
+      T v = main.iterateTwoLL(src, to, dot);
+      dp.insert({{src, to}, v});
+      return v;
     }
 
     T getModule(int src) { return main.getModule(src); }
 };
 
 template <typename T>
-struct Main {
+struct KNN {
   private:
     QueryEngine<T> qe;
-    int LenUsers;
+    int LenUsers, K;
+    vector<priority_queue<Node<T>>> knear;
+  
+  protected:
+    void push(int src, const Node<T> &x) {
+      if (knear[src].size() >= K) 
+        knear[src].pop();
+      knear[src].push(x);
+    }
+
+    void printPQ(int src) {
+      while (!knear[src].empty()) {
+        auto x = knear[src].top();
+        printf("%f - %d\n", x.v, x.index);
+        knear[src].pop();
+      }
+    }
 
   public:
-    Main(MatrixLLBased<T> x, int u): qe(x), LenUsers(++u) {}
+    KNN(MatrixLLBased<T> x, int u, int k)
+      : qe(x), LenUsers(++u), K(k), knear(u) {}
     
     pair<T, int> fitManhattan(int src) {
       pair<T, int> fit = {INF, -1};
@@ -141,7 +181,7 @@ struct Main {
       T v;
       for (int i = 1; i <= LenUsers; ++i) {
         if (src == i) continue;
-        v = qe.eucledian(src, i);
+        v = sqrtf(qe.eucledian(src, i));
         fit = (v < fit.first) ? (pair<T, int>){v, i} : fit;
       }
 
@@ -149,16 +189,18 @@ struct Main {
     }
 
     pair<T, int> fitCosine(int src) {
-      printf("%d\n", src);
       pair<T, int> fit = {-1.0f, -1};
       T v;
       for (int i = 1; i <= LenUsers; ++i) {
         if (src == i) continue;
         v = qe.dotProduct(src, i)/(sqrtf(qe.getModule(src)) * sqrtf(qe.getModule(i)));
+        if (std::isnan(v)) continue;
+        Node<T> *node = new Node<T>(v, i);
+        push(src, *node);
         fit = (v > fit.first) ? (pair<T, int>){v, i} : fit;
       }
 
+      printPQ(src);
       return fit;
     }
-    
 };

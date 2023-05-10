@@ -1,14 +1,17 @@
 #include <iostream>
 #include <cstring>
+
 #include "ds.hpp"
 
-constexpr int MAX_USERS = 283228;
+constexpr int MAX_USERS = 2; //283228
 constexpr int LINE = 1024;
-constexpr int BOOKS_INPUT = 58098;
+constexpr int BOOKS_INPUT = 5; //58098
 constexpr int BUFFER = 200;
 
-const char *iFiLeName = "ratmed.txt";
-const char *iMovName = "movmed.txt";
+constexpr int K = 5;
+
+const char *iFiLeName = "test.txt";
+const char *iMovName = "testmov.txt";
 
 char *sparTitle[BOOKS_INPUT + 1];
 int sparIndex[BOOKS_INPUT + 1];
@@ -76,11 +79,55 @@ int main(int, char**) {
 
   fclose(iFile);
 
-  Main<float> x = Main<float>(mt, MAX_USERS); 
+  KNN<float> x = KNN<float>(mt, MAX_USERS, K); 
 
-  pair<float, int> a = x.fitCosine(23);
-  printf("%f . %d\n", a.first, a.second);
+  int option, idUser, a, b;
+  float out;
+  pair<float, int> res;
+  do {
+    printf("Select an option:\n0) Pearson\n1) Cosine Similarity\n2) Manhattan Distance\n3) Eucledian Distance\n4) Exit\n");
+    scanf("%d", &option);
 
+    switch (option) {
+      case 0:
+        /*
+        printf("Put the User Id A and B: \n");
+        scanf("%d %d", &a, &b);
+        out = queryPearsonCoef(&matrix, a, b);
+        printf("pearson coef: %f\n", out);
+        */
+        break;
+
+      case 1:
+        printf("Put the User Id: ");
+        scanf("%d", &idUser);
+        res = x.fitCosine(idUser);
+        printf("cos: %f - id user: %d\n", res.first, res.second);
+        break;
+
+      case 2:
+        printf("Put the User Id: ");
+        scanf("%d", &idUser);
+        res = x.fitManhattan(idUser);
+        printf("cos: %f - id user: %d\n", res.first, res.second);
+        break;
+      
+      case 3:
+        printf("Put the User Id: ");
+        scanf("%d", &idUser);
+        res = x.fitEucledian(idUser);
+        printf("cos: %f - id user: %d\n", res.first, res.second);
+        break;
+      
+      case 4:
+        printf("Bye!\n");
+        return 0;
+      
+      default:
+        printf("That option doesn't exist!\n");
+        break;
+    }
+  } while (option != 4);
 
   free();
   return EXIT_SUCCESS;
