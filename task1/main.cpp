@@ -12,6 +12,10 @@ constexpr int K = 5;
 
 const char *iFiLeName = "movi-ratings-out.txt"; // movi-ratings-out.txt ratmed.txt
 const char *iMovName = "movi-ratings-mov.txt";  // movi-ratings-mov.txt movmed.txt
+const char *iUsers = "movi-ratings-user-name.txt";
+
+const bool areThereNames = true;
+char *names[MAX_USERS + 1];
 
 int main(int, char**) {
   FILE *iMov;
@@ -36,6 +40,26 @@ int main(int, char**) {
   
   fclose(iMov);
 
+  if (areThereNames == true) {
+    FILE *iName;
+    iName = fopen(iUsers, "r");
+    if (iName == NULL) {
+      perror("Error while opening iUsers the File!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    i = 1;
+    while (fgets(line, sizeof(line), iName) != NULL && i <= BOOKS_INPUT) {
+      if (sscanf(line, "%d\t %[^\n]", &id, buffer) == 2) {
+        names[id] = new char[strlen(buffer) + 1];
+        strcpy(names[id], buffer);
+        ++i;
+      }
+    }
+
+    fclose(iName);
+  }
+
   FILE *iFile;
   iFile = fopen(iFiLeName, "r");
   if (!iFile) {
@@ -54,6 +78,12 @@ int main(int, char**) {
   fclose(iFile);
 
   auto x = KNN<float, string>(mt, MAX_USERS, K); 
+
+  for (int i = 1; i <= MAX_USERS; ++i) {
+    if (names[i] != nullptr) {
+      std::cout << names[i] << '\n';
+    }
+  }
 
   int option, idUser, a, b;
   float out;
@@ -75,6 +105,7 @@ int main(int, char**) {
         scanf("%d", &idUser);
         res = x.fitCosine(idUser);
         printf("cos: %f - id user: %d\n", res.first, res.second);
+        printf("Name: %s\n", names[res.second]);
         break;
 
       case 2:
