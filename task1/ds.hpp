@@ -249,9 +249,13 @@ struct KNN {
       for (int i = 1; i < LenUsers; ++i) {
         if (src == i) continue;
         v = qe.manhattan(src, i);
+        if (std::isnan(v)) continue;
+        Node<T> *node = new Node<T>(v, i);
+        push(src, *node);
         fit = (v < fit.first) ? (pair<T, int>){v, i} : fit;
       }
 
+      printPQ(src);
       return fit;
     }
 
@@ -261,9 +265,13 @@ struct KNN {
       for (int i = 1; i < LenUsers; ++i) {
         if (src == i) continue;
         v = sqrtf(qe.eucledian(src, i));
+        if (std::isnan(v)) continue;
+        Node<T> *node = new Node<T>(v, i);
+        push(src, *node);
         fit = (v < fit.first) ? (pair<T, int>){v, i} : fit;
       }
 
+      printPQ(src);
       return fit;
     }
 
@@ -271,7 +279,6 @@ struct KNN {
       pair<T, int> fit = {-1.0f, -1};
       T v;
       for (int i = 1; i < LenUsers; ++i) {
-        //printf("%d - %d\n", i, LenUsers);
         if (src == i) continue;
         v = qe.dotProduct(src, i)/(sqrtf(qe.getModule(src)) * sqrtf(qe.getModule(i)));
         if (std::isnan(v)) continue;

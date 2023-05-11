@@ -3,15 +3,15 @@
 
 #include "ds.hpp"
 
-constexpr int MAX_USERS = 283228; //283228 2 25
+constexpr int MAX_USERS = 25; //283228 2 25
 constexpr int LINE = 1024;
-constexpr int BOOKS_INPUT = 58098; //58098 5 25
+constexpr int BOOKS_INPUT = 25; //58098 5 25
 constexpr int BUFFER = 200;
 
 constexpr int K = 5;
 
-const char *iFiLeName = "ratmed.txt";
-const char *iMovName = "movmed.txt";
+const char *iFiLeName = "movi-ratings-out.txt"; // movi-ratings-out.txt ratmed.txt
+const char *iMovName = "movi-ratings-mov.txt";  // movi-ratings-mov.txt movmed.txt
 
 int main(int, char**) {
   FILE *iMov;
@@ -81,14 +81,14 @@ int main(int, char**) {
         printf("Put the User Id: ");
         scanf("%d", &idUser);
         res = x.fitManhattan(idUser);
-        printf("cos: %f - id user: %d\n", res.first, res.second);
+        printf("Manha: %f - id user: %d\n", res.first, res.second);
         break;
       
       case 3:
         printf("Put the User Id: ");
         scanf("%d", &idUser);
         res = x.fitEucledian(idUser);
-        printf("cos: %f - id user: %d\n", res.first, res.second);
+        printf("Eucle: %f - id user: %d\n", res.first, res.second);
         break;
       
       case 4:
