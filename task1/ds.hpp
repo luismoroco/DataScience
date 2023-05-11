@@ -93,23 +93,27 @@ struct MatrixLLBased {
     this->roots[src].add(node); 
   }
 
-  T iterateTwoLL(int src, int to, function<T(T, T)> f) {
+  T iterateTwoLL(int src, int to, function<T(T, T)> f, bool count = false) {
     T v = 0.0f;
     Node<T> *F = this->roots[src].root;
     Node<T> *S = this->roots[to].root;
+    int n = 0;
 
     while (F != nullptr && S != nullptr) {
       if (F->index == S->index) {
         //printf("%f %f\n", F->v, S->v);
         v += f(F->v, S->v);
         F = F->next;
-        S = S->next; 
+        S = S->next;
+        ++n; 
       } else if (F->index < S->index) {
         F = F->next;
       } else {
         S = S->next;
       }
     } 
+
+    if (count == true) ndp.insert({{src, to}, n});
 
     return v;
   } 
@@ -137,6 +141,15 @@ struct MatrixLLBased {
     }
 
     return diff;
+  }
+
+  int searchN(int src, int to) {
+    pair<int, int> x = {src, to}, y = {to, src};
+    auto a = ndp.find(x);
+    if (a != ndp.end()) return a->second;
+    auto b = ndp.find(y);
+    if (b != ndp.end()) return b->second;
+    return -1;
   }
 
   T getModule(int src) { return roots[src].module; }
@@ -180,16 +193,19 @@ struct QueryEngine {
       if (query.first != false) 
         return query.second;
       
-      T v = main.iterateTwoLL(src, to, dot);
+      T v = main.iterateTwoLL(src, to, dot, true);
       dp.insert({{src, to}, v});
       return v;
     }
 
     T pearson(int src, int to) {
       T f = dotProduct(src, to);
+      int n = getN(src, to);
+      T s = (getSum(src) * getSum(to))/n;
+      T t = sqrt(getModule(src) - (pow(getSum(src), 2)/n));
+      T q = sqrt(getModule(to) - (pow(getSum(to), 2)/n));
 
-      
-      return;
+      return (t * q == 0) ? 0.0f : (f - s) / (t * q);
     }
 
     T cosine(int src, int to) {
@@ -198,6 +214,7 @@ struct QueryEngine {
 
     T getModule(int src) { return main.getModule(src); }
     T getSum(int src) { return main.getSum(src); }
+    int getN(int src, int to) { return main.searchN(src, to); }
 };
 
 template <typename T, typename R>
@@ -265,5 +282,9 @@ struct KNN {
 
       printPQ(src);
       return fit;
+    }
+
+    T fitPearson(int src, int to) {
+      return qe.pearson(src, to);
     }
 };

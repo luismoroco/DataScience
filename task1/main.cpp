@@ -3,15 +3,15 @@
 
 #include "ds.hpp"
 
-constexpr int MAX_USERS = 25; //283228 2 25
+constexpr int MAX_USERS = 283228; //283228 2 25
 constexpr int LINE = 1024;
-constexpr int BOOKS_INPUT = 25; //58098 5 25
+constexpr int BOOKS_INPUT = 58098; //58098 5 25
 constexpr int BUFFER = 200;
 
 constexpr int K = 5;
 
-const char *iFiLeName = "movi-ratings-out.txt";
-const char *iMovName = "movi-ratings-mov.txt";
+const char *iFiLeName = "ratmed.txt";
+const char *iMovName = "movmed.txt";
 
 int main(int, char**) {
   FILE *iMov;
@@ -64,12 +64,10 @@ int main(int, char**) {
 
     switch (option) {
       case 0:
-    
-        //printf("Put the User Id A and B: \n");
-        //scanf("%d %d", &a, &b);
-        //out = queryPearsonCoef(&matrix, a, b);
-        //printf("pearson coef: %f\n", out);
-
+        printf("Put the User Id A and B: \n");
+        scanf("%d %d", &a, &b);
+        out = x.fitPearson(a, b);
+        printf("pearson coef: %f\n", out);
         break;
 
       case 1:
