@@ -9,6 +9,7 @@
 #include <limits>
 #include <map>
 #include <queue>
+#include <set>
 
 using std::priority_queue;
 using std::numeric_limits;
@@ -16,6 +17,8 @@ using std::vector;
 using std::function;
 using std::pair;
 using std::map;
+using std::set;
+using std::string;
 
 const float INF = numeric_limits<float>::max();
 
@@ -29,6 +32,25 @@ struct Node {
     :v(v), index(x), next(nullptr) {}
   
   bool operator<(const Node<T>& b) const { return v > b.v; }
+};
+
+template <typename T>
+struct ObjectEngine {
+  private:
+    set<pair<int, T>> beng;
+  
+  public:
+    T search(int src) {
+      auto it = beng.lower_bound({src, T()});
+      if (it != beng.end()) {
+        return it->second;
+      } 
+      return T();
+    }
+
+    void add(int id, T w) {
+      beng.insert({id, w});
+    }
 };
 
 template <typename T>
@@ -56,9 +78,10 @@ struct LinkedList {
   }
 };
 
-template <typename T>
+template <typename T, typename R>
 struct MatrixLLBased {
   vector<LinkedList<T>> roots;
+  map<pair<int, int>, int> ndp;
 
   MatrixLLBased(int Len): roots(++Len) {
     for (auto& x : roots) 
@@ -77,6 +100,7 @@ struct MatrixLLBased {
 
     while (F != nullptr && S != nullptr) {
       if (F->index == S->index) {
+        //printf("%f %f\n", F->v, S->v);
         v += f(F->v, S->v);
         F = F->next;
         S = S->next; 
@@ -90,21 +114,47 @@ struct MatrixLLBased {
     return v;
   } 
 
+  vector<R> differen(int src, int to) {
+    vector<R> diff;
+    Node<T> *F = this->roots[src].root;
+    Node<T> *S = this->roots[to].root;
+
+    while (F != nullptr && S != nullptr) {
+      if (F->index == S->index) {
+        F = F->next;
+        S = S->next;
+      } else if (F->index < S->index) {
+        diff.push_back(S->value);
+        S = S->next;
+      } else {
+        F = F->next;
+      }
+    }
+
+    while (S != nullptr) {
+        diff.push_back(S->value);
+        S = S->next;
+    }
+
+    return diff;
+  }
+
   T getModule(int src) { return roots[src].module; }
+  T getSum(int src) { return roots[src].sum; }
 };
 
-template <typename T>
+template <typename T, typename R>
 struct QueryEngine {
   private:
-    MatrixLLBased<T> main;
-    map<pair<int, int>, T> dp;
+    MatrixLLBased<T, R> main;
+    map<pair<int, int>, T> dp; 
     
     function<T(T, T)> dot = [](T x, T y) -> T { return x * y; };
     function<T(T, T)> manh = [](T x, T y) -> T { return fabs(x - y); };
     function<T(T, T)> eucle = [](T x, T y) -> T { return powf((x - y), 2); };
 
   public:
-    QueryEngine(MatrixLLBased<T> v): main(v) {}
+    QueryEngine(MatrixLLBased<T, R> v): main(v) {}
 
     pair<bool, T> search(int src, int to) {
       pair<int, int> x = {src, to}, y = {to, src};
@@ -135,13 +185,25 @@ struct QueryEngine {
       return v;
     }
 
+    T pearson(int src, int to) {
+      T f = dotProduct(src, to);
+
+      
+      return;
+    }
+
+    T cosine(int src, int to) {
+      T v = dotProduct(src, to)/(sqrtf(getModule(src)) * sqrtf(getModule(to)));
+    }
+
     T getModule(int src) { return main.getModule(src); }
+    T getSum(int src) { return main.getSum(src); }
 };
 
-template <typename T>
+template <typename T, typename R>
 struct KNN {
   private:
-    QueryEngine<T> qe;
+    QueryEngine<T, R> qe;
     int LenUsers, K;
     vector<priority_queue<Node<T>>> knear;
   
@@ -161,13 +223,13 @@ struct KNN {
     }
 
   public:
-    KNN(MatrixLLBased<T> x, int u, int k)
+    KNN(MatrixLLBased<T, R> x, int u, int k)
       : qe(x), LenUsers(++u), K(k), knear(u) {}
     
     pair<T, int> fitManhattan(int src) {
       pair<T, int> fit = {INF, -1};
       T v;
-      for (int i = 1; i <= LenUsers; ++i) {
+      for (int i = 1; i < LenUsers; ++i) {
         if (src == i) continue;
         v = qe.manhattan(src, i);
         fit = (v < fit.first) ? (pair<T, int>){v, i} : fit;
@@ -179,7 +241,7 @@ struct KNN {
     pair<T, int> fitEucledian(int src) {
       pair<T, int> fit = {INF, -1};
       T v;
-      for (int i = 1; i <= LenUsers; ++i) {
+      for (int i = 1; i < LenUsers; ++i) {
         if (src == i) continue;
         v = sqrtf(qe.eucledian(src, i));
         fit = (v < fit.first) ? (pair<T, int>){v, i} : fit;
@@ -191,7 +253,8 @@ struct KNN {
     pair<T, int> fitCosine(int src) {
       pair<T, int> fit = {-1.0f, -1};
       T v;
-      for (int i = 1; i <= LenUsers; ++i) {
+      for (int i = 1; i < LenUsers; ++i) {
+        //printf("%d - %d\n", i, LenUsers);
         if (src == i) continue;
         v = qe.dotProduct(src, i)/(sqrtf(qe.getModule(src)) * sqrtf(qe.getModule(i)));
         if (std::isnan(v)) continue;

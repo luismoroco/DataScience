@@ -3,41 +3,15 @@
 
 #include "ds.hpp"
 
-constexpr int MAX_USERS = 2; //283228
+constexpr int MAX_USERS = 25; //283228 2 25
 constexpr int LINE = 1024;
-constexpr int BOOKS_INPUT = 5; //58098
+constexpr int BOOKS_INPUT = 25; //58098 5 25
 constexpr int BUFFER = 200;
 
 constexpr int K = 5;
 
-const char *iFiLeName = "test.txt";
-const char *iMovName = "testmov.txt";
-
-char *sparTitle[BOOKS_INPUT + 1];
-int sparIndex[BOOKS_INPUT + 1];
-
-int binarySearch(int target) {
-  int left = 0;
-  int right = BOOKS_INPUT;
-  int middle;
-
-  while (left <= right) {
-    middle = (left + right)/2;
-    if (sparIndex[middle] == target) {
-      return middle;  
-    } else if (sparIndex[middle] < target) {
-      left = middle + 1;
-    } else {
-      right = middle - 1;
-    }
-  }
-  return -1;
-}
-
-void free() {
-  for (int i = 1; i <= BOOKS_INPUT; ++i)
-    delete[] sparTitle[i];
-}
+const char *iFiLeName = "movi-ratings-out.txt";
+const char *iMovName = "movi-ratings-mov.txt";
 
 int main(int, char**) {
   FILE *iMov;
@@ -46,16 +20,16 @@ int main(int, char**) {
     perror("Error while opening iMov the File!\n");
     exit(EXIT_FAILURE);
   }
- 
+
+  auto oEng = ObjectEngine<string>();
+
   int id;
   int i = 1;
   char line[LINE];
   char buffer[BUFFER];
   while (fgets(line, sizeof(line), iMov) != NULL && i <= BOOKS_INPUT) {
     if (sscanf(line, "%d\t %[^\n]", &id, buffer) == 2) {
-      sparTitle[i] = new char[strlen(buffer) + 1];
-      sparIndex[i] = id;
-      strcpy(sparTitle[i], buffer);
+      oEng.add(id, string(buffer));
       ++i;
     }
   }
@@ -69,7 +43,7 @@ int main(int, char**) {
     exit(EXIT_FAILURE);
   }
 
-  MatrixLLBased<float> mt = MatrixLLBased<float>(MAX_USERS);
+  auto mt = MatrixLLBased<float, string>(MAX_USERS);
 
   int head, node;
   float rating;
@@ -79,7 +53,7 @@ int main(int, char**) {
 
   fclose(iFile);
 
-  KNN<float> x = KNN<float>(mt, MAX_USERS, K); 
+  auto x = KNN<float, string>(mt, MAX_USERS, K); 
 
   int option, idUser, a, b;
   float out;
@@ -90,12 +64,12 @@ int main(int, char**) {
 
     switch (option) {
       case 0:
-        /*
-        printf("Put the User Id A and B: \n");
-        scanf("%d %d", &a, &b);
-        out = queryPearsonCoef(&matrix, a, b);
-        printf("pearson coef: %f\n", out);
-        */
+    
+        //printf("Put the User Id A and B: \n");
+        //scanf("%d %d", &a, &b);
+        //out = queryPearsonCoef(&matrix, a, b);
+        //printf("pearson coef: %f\n", out);
+
         break;
 
       case 1:
@@ -129,6 +103,5 @@ int main(int, char**) {
     }
   } while (option != 4);
 
-  free();
   return EXIT_SUCCESS;
 }
