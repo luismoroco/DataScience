@@ -3,15 +3,15 @@
 
 #include "ds.hpp"
 
-constexpr int MAX_USERS = 25; //283228 2 25
+constexpr int MAX_USERS = 25; //283228 2 25 2
 constexpr int LINE = 1024;
-constexpr int BOOKS_INPUT = 25; //58098 5 25
+constexpr int BOOKS_INPUT = 25; //58098 5 25 5 
 constexpr int BUFFER = 200;
 
-constexpr int K = 10;
+constexpr int K = 5;
 
-const char *iFiLeName = "movi-ratings-out.txt"; // movi-ratings-out.txt ratmed.txt
-const char *iMovName = "movi-ratings-mov.txt";  // movi-ratings-mov.txt movmed.txt
+const char *iFiLeName = "movi-ratings-out.txt"; // movi-ratings-out.txt ratmed.txt coef-rat.txt
+const char *iMovName = "movi-ratings-mov.txt";  // movi-ratings-mov.txt movmed.txt coef-mov.txt
 const char *iUsers = "movi-ratings-user-name.txt";
 
 const bool areThereNames = false;
@@ -77,9 +77,17 @@ int main(int, char**) {
 
   fclose(iFile);
 
-  auto x = KNN<float, string>(mt, MAX_USERS, K); 
+  //auto x = KNN<float, string>(mt, MAX_USERS, K); 
 
-  /* */
+  //auto y = x.fitPearson(1, 2);
+  
+  
+  auto qe = QueryEngine<float, string>(mt);
+
+  auto y = qe.pearson(5, 21);
+  printf("%f\n", y);
+
+  /* 
   int option, idUser, a, b;
   float out;
   pair<float, int> res;
@@ -89,7 +97,7 @@ int main(int, char**) {
 
     switch (option) {
       case 0:
-        printf("Put the User Id A and B: \n");
+        printf("Put the User Id: \n");
         scanf("%d", &a);
         res = x.fitBestPearson(a);
         printf("cos: %f - id user: %d\n", res.first, res.second);
@@ -100,7 +108,6 @@ int main(int, char**) {
         scanf("%d", &idUser);
         res = x.fitCosine(idUser);
         printf("cos: %f - id user: %d\n", res.first, res.second);
-        //printf("Name: %s\n", names[res.second]);
         break;
 
       case 2:
@@ -125,7 +132,7 @@ int main(int, char**) {
         printf("That option doesn't exist!\n");
         break;
     }
-  } while (option != 4);
+  } while (option != 4);*/
 
   return EXIT_SUCCESS;
 }

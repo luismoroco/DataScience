@@ -42,9 +42,8 @@ struct ObjectEngine {
   public:
     T search(int src) {
       auto it = beng.lower_bound({src, T()});
-      if (it != beng.end()) {
+      if (it != beng.end()) 
         return it->second;
-      } 
       return T();
     }
 
@@ -69,13 +68,13 @@ struct LinkedList {
       this->tail = node;
       this->size += 1;
       this->module += powf(node->v, 2);
-      //this->sum += node->v;
+      this->sum += node->v;
     } else {
       this->tail->next = node;
       this->tail = node;
       this->size += 1;
       this->module += powf(node->v, 2);
-      //this->sum += node->v;
+      this->sum += node->v;
     }
   }
 };
@@ -103,7 +102,7 @@ struct MatrixLLBased {
 
     while (F != nullptr && S != nullptr) {
       if (F->index == S->index) {
-        //printf("%f %f\n", F->v, S->v);
+        printf("com: %f - %f\n", F->v, S->v);
         v += f(F->v, S->v);
         F = F->next;
         S = S->next;
@@ -116,7 +115,6 @@ struct MatrixLLBased {
     } 
 
     if (count == true) ndp.insert({{src, to}, n});
-
     return v;
   } 
 
@@ -187,7 +185,7 @@ struct QueryEngine {
     }
 
     T eucledian(int src, int to) {
-      return main.iterateTwoLL(src, to, eucle);
+      return sqrtf(main.iterateTwoLL(src, to, eucle));
     } 
 
     T dotProduct(int src, int to) {
@@ -203,18 +201,15 @@ struct QueryEngine {
     T pearson(int src, int to) {
       T f = dotProduct(src, to);
       int n = getN(src, to);
+      if (n == 0) return 0.0f;
       T s = (getSum(src) * getSum(to))/n;
-      T t = sqrtf(getModule(src) - ((pow(getSum(src), 2))/n));
-      T q = sqrtf(getModule(to) - ((pow(getSum(to), 2))/n));
-
-      //T g = getSum(to);
-      //printf("SUMA ============> %f\n", g);
-
-      return (t * q == 0) ? 0.0f : (f - s) / (t * q);
+      T t = sqrtf(getModule(src) - pow(getSum(src), 2)/n);
+      T q = sqrtf(getModule(to) - pow(getSum(to), 2)/n);
+      return ((t * q) == 0) ? 0.0f : (f - s) / (t * q);
     }
 
     T cosine(int src, int to) {
-      T v = dotProduct(src, to)/(sqrtf(getModule(src)) * sqrtf(getModule(to)));
+      return dotProduct(src, to)/(sqrtf(getModule(src)) * sqrtf(getModule(to)));
     }
 
     T getModule(int src) { return main.getModule(src); }
@@ -269,7 +264,7 @@ struct KNN {
       T v;
       for (int i = 1; i < LenUsers; ++i) {
         if (src == i) continue;
-        v = sqrtf(qe.eucledian(src, i));
+        v = qe.eucledian(src, i);
         if (std::isnan(v)) continue;
         Node<T> *node = new Node<T>(v, i);
         push(src, *node);
@@ -285,7 +280,7 @@ struct KNN {
       T v;
       for (int i = 1; i < LenUsers; ++i) {
         if (src == i) continue;
-        v = qe.dotProduct(src, i)/(sqrtf(qe.getModule(src)) * sqrtf(qe.getModule(i)));
+        v = qe.cosine(src, i);
         if (std::isnan(v)) continue;
         Node<T> *node = new Node<T>(v, i);
         push(src, *node);
