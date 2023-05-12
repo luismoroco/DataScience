@@ -2,6 +2,7 @@
  * DS using in program
 */
 
+#include <iostream>
 #include <vector>
 #include <functional>
 #include <cmath>
@@ -113,7 +114,7 @@ struct MatrixLLBased {
         S = S->next;
       }
     } 
-
+    printf("n foud for src and to: %d\n", n);
     if (count == true) ndp.insert({{src, to}, n});
     return v;
   } 
@@ -152,8 +153,9 @@ struct MatrixLLBased {
     return -1;
   }
 
-  T getModule(int src) { return roots[src].module; }
-  T getSum(int src) { return roots[src].sum; }
+  inline T getModule(int src) const { return roots[src].module; }
+  inline T getSum(int src) const { return roots[src].sum; }
+  inline int getSize(int src) const { return roots[src].size; }
 };
 
 template <typename T, typename R>
@@ -199,13 +201,18 @@ struct QueryEngine {
     }
 
     T pearson(int src, int to) {
+
+
       T f = dotProduct(src, to);
-      int n = getN(src, to);
-      if (n == 0) return 0.0f;
+      //int n = getN(src, to); 
+      const int n = 25;
+      printf("n: %d\n", n);
+      if (n == 0)
+        return 0.0f;
       T s = (getSum(src) * getSum(to))/n;
       T t = sqrtf(getModule(src) - pow(getSum(src), 2)/n);
       T q = sqrtf(getModule(to) - pow(getSum(to), 2)/n);
-      return ((t * q) == 0) ? 0.0f : (f - s) / (t * q);
+      return ((t * q) == 0 || std::isnan(t * q)) ? 0.0f : (f - s) / (t * q);
     }
 
     T cosine(int src, int to) {

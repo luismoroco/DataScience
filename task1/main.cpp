@@ -77,17 +77,17 @@ int main(int, char**) {
 
   fclose(iFile);
 
-  //auto x = KNN<float, string>(mt, MAX_USERS, K); 
+  auto x = KNN<float, string>(mt, MAX_USERS, K); 
 
   //auto y = x.fitPearson(1, 2);
   
   
-  auto qe = QueryEngine<float, string>(mt);
+  //auto qe = QueryEngine<float, string>(mt);
 
-  auto y = qe.pearson(5, 21);
-  printf("%f\n", y);
+  //auto y = qe.pearson(1, 2);
+  //printf("%f\n", y);
 
-  /* 
+
   int option, idUser, a, b;
   float out;
   pair<float, int> res;
@@ -132,7 +132,7 @@ int main(int, char**) {
         printf("That option doesn't exist!\n");
         break;
     }
-  } while (option != 4);*/
+  } while (option != 4); 
 
   return EXIT_SUCCESS;
 }
