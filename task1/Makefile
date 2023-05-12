@@ -2,5 +2,5 @@ APP=Task1
 
 .PHONY: run 
 run:
-	gcc main.c exe
+	g++ main.cpp -o exe
 	./exe

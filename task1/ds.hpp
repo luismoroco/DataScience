@@ -68,12 +68,14 @@ struct LinkedList {
       this->root = node;
       this->tail = node;
       this->size += 1;
-      this->module += node->v * node->v;
+      this->module += powf(node->v, 2);
+      //this->sum += node->v;
     } else {
       this->tail->next = node;
       this->tail = node;
       this->size += 1;
-      this->module += node->v * node->v;
+      this->module += powf(node->v, 2);
+      //this->sum += node->v;
     }
   }
 };
@@ -202,8 +204,11 @@ struct QueryEngine {
       T f = dotProduct(src, to);
       int n = getN(src, to);
       T s = (getSum(src) * getSum(to))/n;
-      T t = sqrt(getModule(src) - (pow(getSum(src), 2)/n));
-      T q = sqrt(getModule(to) - (pow(getSum(to), 2)/n));
+      T t = sqrtf(getModule(src) - ((pow(getSum(src), 2))/n));
+      T q = sqrtf(getModule(to) - ((pow(getSum(to), 2))/n));
+
+      //T g = getSum(to);
+      //printf("SUMA ============> %f\n", g);
 
       return (t * q == 0) ? 0.0f : (f - s) / (t * q);
     }
@@ -281,6 +286,23 @@ struct KNN {
       for (int i = 1; i < LenUsers; ++i) {
         if (src == i) continue;
         v = qe.dotProduct(src, i)/(sqrtf(qe.getModule(src)) * sqrtf(qe.getModule(i)));
+        if (std::isnan(v)) continue;
+        Node<T> *node = new Node<T>(v, i);
+        push(src, *node);
+        fit = (v > fit.first) ? (pair<T, int>){v, i} : fit;
+      }
+
+      printPQ(src);
+      return fit;
+    }
+
+    pair<T, int> fitBestPearson(int src) {
+      pair<T, int> fit = {-1.0f, -1};
+      T v;
+      for (int i = 1; i < LenUsers; ++i) {
+        if (src == i) continue;
+        v = qe.pearson(src, i);
+        std::cout << v << '\n';
         if (std::isnan(v)) continue;
         Node<T> *node = new Node<T>(v, i);
         push(src, *node);
